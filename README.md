@@ -8,7 +8,7 @@ My goal in creating this project was to use some of the new OOP principles I'd l
 ## Note on naming conventions
 Some naming convention issues like those of method names aren't highly empathised because they vary from language to language, and I feel over empathizing the naming conventions might detract from some of the other points of this review.
 
-## General Readabillity
+## General Readability
 
 Here's the current implementation of Form1
 
@@ -295,7 +295,7 @@ Finally, we'll change paddleOffset to PaddlePadding which I find slightly more d
 
 ## Why are we storing the ball bitmap?
 
-Now that we've choosen better names for our varriables, let's look at another concern: Why are we storing the ball bitmap? We can address this by looking at the gameLoop() method.
+Now that we've chosen better names for our variables, let's look at another concern: Why are we storing the ball bitmap? We can address this by looking at the gameLoop() method.
 
 ```c#
         private void gameLoop(Object myObject, EventArgs args)
@@ -322,7 +322,7 @@ Now that we've choosen better names for our varriables, let's look at another co
         }
 ```
 
-Looking at this code, we can see that balls are created every time a player scores. Looking at the newBall() method, we can see that a picture of the ball is one of the paramaters for constructing a Ball object. Because we're constantly creating new balls every time a player scores, the program needs to maintain a refference to the picture of the ball to use as a constructor paramater. We'll first look at the ball class, and then change the way the program to handles scoring.
+Looking at this code, we can see that balls are created every time a player scores. Looking at the newBall() method, we can see that a picture of the ball is one of the parameters for constructing a Ball object. Because we're constantly creating new balls every time a player scores, the program needs to maintain a reference to the picture of the ball to use as a constructor parameter. We'll first look at the ball class, and then change the way the program to handles scoring.
 
 ```c#
 public class Ball
@@ -420,10 +420,10 @@ This method is called every time the player scores, and the current ball object 
             }
 ```
 
-We want to change this to no longer create a newBall(), which serves a number of benifits:
+We want to change this to no longer create a newBall(), which serves a number of benefits:
 
 1. It's more intuitive to reset the balls position and velocity, than reset it by creating a new object. You can even use a more intuitive name like ball.resetBall(), instead of ball = newBall();
-2. We're not creating and destroying objects wastefully. Creating a few ball objects oubivously won't create memory issues, however it seems like the program is designed to go out of its' way to create new objects.
+2. We're not creating and destroying objects wastefully. Creating a few ball objects obviously won't create memory issues, however it seems like the program is designed to go out of its' way to create new objects.
 
 
 We'll start by copy and pasting the newBall() method into the Ball class, and making a couple changes.
@@ -497,9 +497,9 @@ One more change we're going to make, is to split the resetPositionAndRandomizeVe
 ```
 
 Let's review the improvements to our code.
- * The Ball class constructor has less paramaters.
+ * The Ball class constructor has less parameters.
  * Our code for resetting the ball's position no longer involves creating a new ball, but instead by resetting the position and velocity, which is more intuitive.
- * The code pertaining to setting the balls initial velocity has been moved inside the ball class, which is more fitting than inside Form1.
+ * The code pertaining to setting the ball's initial velocity has been moved inside the ball class, which is more fitting than inside Form1.
  
 ## Simplifying Code
 
@@ -537,11 +537,12 @@ New
 
 ## Removing Unnecessary Code
 
-The final question looking at the varriables in Form1 gives us, is why do we have the width and height varriables? What are they used for, and how do they differ from Form1.Width and Form1.Height?
+The final question looking at the variables in Form1 gives us, is why do we have the width and height variables? What are they used for, and how do they differ from Form1.Width and Form1.Height?
 
-If you look at the code, you can see that width and height (which are the programs width and height) are used for determining the location of the paddles, ball, and the ball colision rectangle. Both differ from Form1's properties as they describe the drawable screen. Or in other words, Form1.Height includes the top bar of the application where you can 🗖 or X. If this was included in the ball's colision rectangle, the ball would go far below bottom of the screen before bouncing off the bottom wall.
+If you look at the code, you can see that width and height (which are the programs width and height) are used for determining the location of the paddles, ball, and the ball collision rectangle. Both differ from Form1's properties as they describe the drawable screen. Or in other words, Form1.Height includes the top bar of the application where you can 🗖 or X. If this was included in the ball's collision rectangle, the ball would go far below bottom of the screen before bouncing off the bottom wall.
 
 That being said, both properties are very necessary for the program, however there is already a property called DisplayRectangle that when inspected has almost identical values to the width and height.
+
 
 ```c#
 
@@ -551,13 +552,10 @@ That being said, both properties are very necessary for the program, however the
 
 ```
 
-Using a watch, you can see that the display rectangle is 8 pixels smaller in each direction. I believe this discrepenacy is caused by the very thin border around the WinForms app when it runs. When running the program, I noticed that sometimes the ball would go slightly too low on the screen. Hopefully this will fix that. If it does, it'll also remove our need for the width and height variables. A few tests confirm it fixes the bug, so we can now remove the width and the height. This was a realitivly minor change, as it probably only removed 5 lines of code, however it certainly removes the mystery of what *Width + this.Left - RectangleToScreen(ClientRectangle).Left;* means.
+Using a watch, you can see that the display rectangle is 8 pixels smaller in each direction. I believe this discrepancy is caused by the very thin border around the WinForms app when it runs. When running the program, I noticed that sometimes the ball would go slightly too low on the screen. Hopefully this will fix that. If it does, it'll also remove our need for the width and height variables. A few tests confirm it fixes the bug, so we can now remove the width and the height. This was a relatively minor change, as it probably only removed 5 lines of code, however it certainly removes the mystery of what *Width + this.Left - RectangleToScreen(ClientRectangle).Left;* means.
 
 ## More code improvement
 There's a lot more that can be done to improve the project, and this code review has focused a lot on some of the smaller implementation details instead of talking about other issues. In fact, I didn't even get to cover all the smaller things like inlining, and maybe the possibility of moving the consts in Form1 into other classes. Anyways I'll try and leave you with a couple things you can look at and think about.
 
 * Is the drawing code vs physics code encapsulated?
 * Is the just scored logic good?
-
-
-* 
