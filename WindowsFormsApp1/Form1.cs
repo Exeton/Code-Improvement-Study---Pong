@@ -32,6 +32,8 @@ namespace WindowsFormsApp1
 
         private void Form1_Load(object sender, EventArgs e)
         {
+
+		//Test
            DoubleBuffered = true;
 
             height = Height + this.Top - RectangleToScreen(ClientRectangle).Top;
