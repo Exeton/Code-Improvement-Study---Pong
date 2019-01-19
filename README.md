@@ -551,4 +551,13 @@ That being said, both properties are very necessary for the program, however the
 
 ```
 
-Using a watch, you can see that the display rectangle is 8 pixels smaller in each direction. I believe this discrepenacy is caused by the very thin border around the WinForms app when it runs. When running the program, I noticed that sometimes the ball would go slightly too low on the screen. Hopefully this will fix that. If it does, it'll also remove our need for the width and height variables. A few tests confirm it fixes the bug, so we can now remove the width and the height. This was a realitivly minor change, as it probably only removed 5 lines of code, however it certainly removes the mystery of what Width + this.Left - RectangleToScreen(ClientRectangle).Left; means.
+Using a watch, you can see that the display rectangle is 8 pixels smaller in each direction. I believe this discrepenacy is caused by the very thin border around the WinForms app when it runs. When running the program, I noticed that sometimes the ball would go slightly too low on the screen. Hopefully this will fix that. If it does, it'll also remove our need for the width and height variables. A few tests confirm it fixes the bug, so we can now remove the width and the height. This was a realitivly minor change, as it probably only removed 5 lines of code, however it certainly removes the mystery of what *Width + this.Left - RectangleToScreen(ClientRectangle).Left;* means.
+
+## More code improvement
+There's a lot more that can be done to improve the project, and this code review has focused a lot on some of the smaller implementation details instead of talking about other issues. In fact, I didn't even get to cover all the smaller things like inlining, and maybe the possibility of moving the consts in Form1 into other classes. Anyways I'll try and leave you with a couple things you can look at and think about.
+
+* Is the drawing code vs physics code encapsulated?
+* Is the just scored logic good?
+
+
+* 
