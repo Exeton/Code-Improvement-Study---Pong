@@ -147,7 +147,7 @@ Right off the bat, you can see that the methods aren't properly spaced, with som
 			InitializeComponent();
 		}
 
-		private void Form1_Load(object sender, EventArgs e)
+	private void Form1_Load(object sender, EventArgs e)
         {
             DoubleBuffered = true;
 
