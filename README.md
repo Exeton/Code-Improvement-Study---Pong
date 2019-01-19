@@ -259,10 +259,11 @@ Now that the code is easier to skim, let's start from the top and look at Form1.
 
 There are a few naming convention issues, however I'll try not to empathize these too much as naming conventions are language specific. That being said, "speedMultiplier" and "MovementPixels" clearly don't follow the same format. Naming conventions aside, this code raises a few questions.
 
-..* What are speedMultiplier and MovementPixels? Are they related to the ball or paddles?
-..* What does paddleOffset do? 
-..* What are the width and height varriables for? Knowing they're for keeping track of the form width / heigh, why are they neccessary? Is this a design flaw?
-..* Why are we storing the ball bitmap?
+
+* What are speedMultiplier and MovementPixels? Are they related to the ball or paddles?
+* What does paddleOffset do? 
+* What are the width and height varriables for? Knowing they're for keeping track of the form width / heigh, why are they neccessary? Is this a design flaw?
+* Why are we storing the ball bitmap?
 
 
 Okay, let's address those questions and a few others. A very crucial and also easy problem to fix are some poorly chosen names like speedMultiplier and MovementPixels. Looking at the code, speedMultiplier is multiplied by a random value to determine the ball's starting velocity. Perhaphs a better name would be InitialBallSpeedMultiplier or AverageInitialBallVelocity. The latter isn't truly reflective of the code, however if the code determining the ball's initial velocity was rewritten this would be an intuitive name.
@@ -289,5 +290,5 @@ Finally, we'll change paddleOffset to PaddlePadding which I find slightly more d
 ```
 
 Now that the naming conventions are improved, let's look at a few of my other concerns.
-..* What are the width and height varriables for? Knowing they're for keeping track of the form width / heigh, why are they neccessary? Is this a design flaw?
-..* Why are we storing the ball bitmap?
+* What are the width and height varriables for? Knowing they're for keeping track of the form width / heigh, why are they neccessary? Is this a design flaw?
+* Why are we storing the ball bitmap?
