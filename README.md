@@ -238,6 +238,7 @@ Right off the bat, you can see that the methods aren't properly spaced, with som
     }
 ```
 
+## Naming Conventions
 Now that the code is easier to skim, let's start from the top and look at Form1. We'll start with all the variables in Form1.
 
 ```C#
@@ -262,15 +263,15 @@ There are a few naming convention issues, however I'll try not to empathize thes
 
 * What are speedMultiplier and MovementPixels? Are they related to the ball or paddles?
 * What does paddleOffset do? 
-* What are the width and height varriables for? Knowing they're for keeping track of the form width / heigh, why are they neccessary? Is this a design flaw?
+* What are the width and height variables  for? Knowing they're for keeping track of the form width / height, why are they necessary? Is this a design flaw?
 * Why are we storing the ball bitmap?
 
 
-Okay, let's address those questions and a few others. A very crucial and also easy problem to fix are some poorly chosen names like speedMultiplier and MovementPixels. Looking at the code, speedMultiplier is multiplied by a random value to determine the ball's starting velocity. Perhaphs a better name would be InitialBallSpeedMultiplier or AverageInitialBallVelocity. The latter isn't truly reflective of the code, however if the code determining the ball's initial velocity was rewritten this would be an intuitive name.
+Okay, let's address those questions and a few others. A very crucial and also easy problem to fix are some poorly chosen names like speedMultiplier and MovementPixels. Looking at the code, speedMultiplier is multiplied by a random value to determine the ball's starting velocity. Perhaps a better name would be InitialBallSpeedMultiplier or AverageInitialBallVelocity. The latter isn't truly reflective of the code, however if the code determining the ball's initial velocity was rewritten this would be an intuitive name.
 
 We'll also change MovementPixels to PaddleSpeedInPixelsPerTick. This is a pretty long name, and can be changed if I think of a better one in the future.
 
-Finally, we'll change paddleOffset to PaddlePadding which I find slightly more descriptive, especially if you have experience with css. This property determines the amount of pixels between the paddle and the left / right edge of the screen. This is called padding when refering to element's relative positions on a webpage.
+Finally, we'll change paddleOffset to PaddlePadding which I find slightly more descriptive, especially if you have experience with css. This property determines the amount of pixels between the paddle and the left / right edge of the screen. This is called padding when referring to element's relative positions on a webpage.
 
 ```c#
         private const int InitialBallSpeedMultiplier = 6;
@@ -289,6 +290,191 @@ Finally, we'll change paddleOffset to PaddlePadding which I find slightly more d
         private Bitmap ballBitmap;
 ```
 
-Now that the naming conventions are improved, let's look at a few of my other concerns.
+## Why are we storing the ball bitmap?
+
+Now that the naming conventions are improved, let's look at one of the two remaining design concerns.
 * What are the width and height varriables for? Knowing they're for keeping track of the form width / heigh, why are they neccessary? Is this a design flaw?
 * Why are we storing the ball bitmap?
+
+Our second question can be addressed by looking at the gameLoop() method.
+
+```c#
+        private void gameLoop(Object myObject, EventArgs args)
+        {
+            BufferedGraphicsContext myContext = BufferedGraphicsManager.Current;
+            BufferedGraphics myBuffer;
+            myBuffer = myContext.Allocate(this.CreateGraphics(), this.DisplayRectangle);
+            Graphics BufferGraphics = myBuffer.Graphics;
+
+            BufferGraphics.Clear(Color.LightPink);
+            foreach (Paddle paddle in paddles)
+            {
+                paddle.doTick();
+                paddle.Draw(BufferGraphics);
+            }
+            ball.draw(BufferGraphics);
+            ball.update(paddles);
+            if (ball.justScored)
+            {
+                ball = newBall();
+            }
+
+            myBuffer.Render();
+        }
+```
+
+Looking at this code, we can see that balls are created every time a player scores. Looking at the newBall() method, we can see that a picture of the ball is one of the paramaters of the Ball object. Because we're constantly creating new balls every time a player scores, we need to maintain a refference to the picture of the ball. Let's look at the Ball class, and modify the program to handle scoring better.
+
+```c#
+public class Ball
+    {
+        private int x;
+        private int y;
+        private Point velocity;
+        public bool justScored;
+        Rectangle screen;
+        Bitmap ballBitmap;
+        public Ball(int X, int Y, Point Velocity, Bitmap BallBitmap, Rectangle Screen)
+        {
+            x = X;
+            y = Y;
+            velocity = Velocity;
+            ballBitmap = BallBitmap;
+            justScored = false;
+            screen = Screen;
+        }
+
+        public void update(Paddle[] paddles)//No ray tracing
+        {
+            Point expectedDestination = new Point(x + velocity.X, y + velocity.Y);
+            Rectangle expectedLocationRectangle = new Rectangle(expectedDestination.X, expectedDestination.Y, ballBitmap.Width, ballBitmap.Height);
+            detectPaddleCollisions(expectedLocationRectangle, paddles);
+            detectWallCollisions(expectedLocationRectangle, paddles);
+
+            x += velocity.X;
+            y += velocity.Y;
+        }
+        public void draw(Graphics g)
+        {
+            g.DrawImage(ballBitmap, new Point(x, y));
+        }
+
+        private void detectPaddleCollisions(Rectangle expectedBallLocation, Paddle[] paddles)
+        {
+            foreach (Paddle paddle in paddles)
+            {
+                if (paddle.paddleRect.IntersectsWith(expectedBallLocation))
+                {
+                    velocity.X = -velocity.X;
+                    velocity.Y += new Random().Next(-2, 3);
+                    break;
+                }
+            }
+        } 
+        private void detectWallCollisions(Rectangle expectedBallLocation, Paddle[] paddles)
+        {
+            if (expectedBallLocation.Bottom > screen.Bottom || expectedBallLocation.Top < screen.Top)
+            {
+                velocity.Y = -velocity.Y;
+                velocity.X += new Random().Next(-1, 2);
+            }
+
+            if (expectedBallLocation.Left < 0)
+            {
+                justScored = true;
+                paddles[1].Score();
+            }
+            if (expectedBallLocation.Right > screen.Right)
+            {
+                justScored = true;
+                paddles[0].Score();
+            }
+        }
+    }
+```
+
+We'll add a method called resetPositionAndRandomizeVelocity() (although this naming convention isn't proper, it fits the theme of the program, so we won't address it). I've copy and pasted the code from the newBall() method, and made a few modifications.
+
+```c#
+		public void resetPositionAndRandomizeVelocity(int startX, int startY)
+		{
+			Random r = new Random();//Be sure to move the random from newBall() from the method to the class.
+			Point ballVelocity = new Point(Form1.InitialBallSpeedMultiplier * r.Next(2, 3), Form1.InitialBallSpeedMultiplier * r.Next(1, 3));
+			if (r.Next(0, 2) == 1)
+			{
+				ballVelocity.X = -ballVelocity.X;
+			}
+			if (r.Next(0, 2) == 1)
+			{
+				ballVelocity.Y = -ballVelocity.Y;
+			}
+
+			this.x = startX;
+			this.y = startY;
+			this.velocity = ballVelocity;
+				
+		}
+```
+
+You'll need to make a few more changes to get this working. But now we'll be able to remove the ball's velocity paramater. The new constructor will look something like this.
+
+```c#
+        public Ball(int X, int Y,  Bitmap BallBitmap, Rectangle Screen)
+        {
+            x = X;
+            y = Y;
+            ballBitmap = BallBitmap;
+            justScored = false;
+            screen = Screen;
+			resetPositionAndRandomizeVelocity(X, Y);
+        }
+```
+
+One more change we're going to make, is to split the resetPositionAndRandomizeVelocity method into two methods, because it violates the 
+Single Responsibility Principle.
+
+```c#
+		public Ball(int X, int Y,  Bitmap BallBitmap, Rectangle Screen)
+        {
+            ballBitmap = BallBitmap;
+            justScored = false;
+            screen = Screen;
+			setPosition(X, Y);
+			randomizeVelocity();
+		}
+
+		public void setPosition(int x, int y)
+		{
+			this.x = x;
+			this.y = y;
+		}
+
+		public void randomizeVelocity()
+		{
+			Point ballVelocity = new Point(Form1.InitialBallSpeedMultiplier * r.Next(2, 3), Form1.InitialBallSpeedMultiplier * r.Next(1, 3));
+			if (r.Next(0, 2) == 1)
+			{
+				ballVelocity.X = -ballVelocity.X;
+			}
+			if (r.Next(0, 2) == 1)
+			{
+				ballVelocity.Y = -ballVelocity.Y;
+			}
+			
+			velocity = ballVelocity;			
+		}
+```
+
+As an exercise, consider the following changes to randomizeVelocity(). Would you make these changes? 
+
+```c#
+		public void randomizeVelocity()
+		{
+			velocity = new Point(Form1.InitialBallSpeedMultiplier * r.Next(2, 3), Form1.InitialBallSpeedMultiplier * r.Next(1, 3));
+			int[] speedMultipliers = { -1, 1 };
+
+			velocity.X *= speedMultipliers[r.Next(2)];
+			velocity.Y *= speedMultipliers[r.Next(2)];		
+		}
+```
+
